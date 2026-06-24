@@ -58,6 +58,7 @@ or Cas-OFFinder if installed) is the extension.
 
 ## Limitations
 
-See `writeup/writeup.md`. In short: the CFD model is a documented approximation;
-on-target predictors are cutting-trained while the trigger is binding; locus
+The CFD model is a documented approximation; on-target predictors are
+cutting-trained while the trigger is binding; the off-target scan covers chr12
+only (full-genome plus population variants are the extension); and locus
 accessibility, WT-KRAS LOH, delivery, and wet-lab validation are out of scope.
