@@ -1,0 +1,8 @@
+# KRAS codon-12 mutation spectrum in PDAC. freq_of_kras_mut = approx fraction
+# of KRAS-mutant PDAC tumors carrying this allele. Sources: COSMIC, TCGA-PAAD,
+# AACR GENIE (approximate; see writeup for citations). snv_index is 0-based into
+# KRAS_REF_CONTEXT (CDS nt 1-90, coding sense).
+allele	cds_pos	ref_base	alt_base	snv_index	freq_of_kras_mut
+G12D	35	G	A	34	0.40
+G12V	35	G	T	34	0.30
+G12R	34	G	C	33	0.17
