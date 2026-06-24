@@ -45,8 +45,8 @@ codon-12 SNV lands in the PAM-proximal seed (positions 1–8 from PAM), where
 mismatches most strongly reduce Cas9 binding. This places WT recognition at
 0.02–0.03 (near-zero) for all three guides.
 
-The three-guide set addresses ~78.3% of PDAC patients (frequency × 0.90
-probability-of-recognition, cumulative). Marginal coverage per allele: 36% (G12D) +
+The three-guide set addresses ~78.3% of PDAC patients (allele frequency × 0.90
+KRAS-mutant fraction, cumulative). Marginal coverage per allele: 36% (G12D) +
 27% (G12V) + 15.3% (G12R). No allele in this set was flagged undesignable.
 
 **Important:** discrimination (mutant vs. WT) is strong for all three alleles.
