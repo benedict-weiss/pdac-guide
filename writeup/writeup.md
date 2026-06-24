@@ -26,7 +26,8 @@ extensible to other PAMs) whose recognition overlaps the mutation, then score:
    PAM-proximal seed, or a mutation that gives the mutant a PAM the WT lacks,
    drives WT recognition to ~0.
 2. **Off-target safety veto** — a genome/chr12 scan, CFD-aggregated, vetoing any
-   guide with a high-CFD off-target; the WT allele is checked explicitly.
+   guide with a high-CFD off-target; the WT allele is checked explicitly. *(Not
+   run in the default configuration — requires `--reference`; see Limitations.)*
 3. **On-target proxy** — a documented guardrail (GC, homopolymers, Pol III
    terminator), used only to break ties. It is *not* a validated predictor.
 
@@ -45,15 +46,16 @@ mismatches most strongly reduce Cas9 binding. This places WT recognition at
 0.02–0.03 (near-zero) for all three guides.
 
 The three-guide set addresses ~78.3% of PDAC patients (frequency × 0.90
-probability-of-recognition, cumulative). Coverage per allele: 36% (G12D) +
+probability-of-recognition, cumulative). Marginal coverage per allele: 36% (G12D) +
 27% (G12V) + 15.3% (G12R). No allele in this set was flagged undesignable.
 
 **Important:** discrimination (mutant vs. WT) is strong for all three alleles.
 Genome-wide off-target safety has **not** been evaluated in the default run — the
-`specificity` column is empty because no reference genome was provided. This
-requires running `scripts/fetch_data.py --reference` to download chr12 (or a
-full-genome index), then re-running the pipeline with `--reference`. That scan is
-the immediate next step and an explicit limitation of this report.
+`specificity` column is empty because no reference genome was provided. Evaluating
+it is a two-step flow — `scripts/fetch_data.py --out data/chr12.fa` to download
+chr12, then `scripts/run_analysis.py --reference data/chr12.fa` to re-run the
+pipeline with the scan. That scan is the immediate next step and an explicit
+limitation of this report.
 
 ## Trade-offs I weighed
 - **Discrimination vs coverage:** chasing rarer alleles adds patients but often
