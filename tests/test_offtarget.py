@@ -25,14 +25,16 @@ def test_finds_near_match_within_threshold_only():
 
 def test_finds_site_on_minus_strand_with_forward_position():
     from guide_design.seq import revcomp
-    spacer = "ACGTACGTACGTACGTACGT"
-    # revcomp(reference) will present: "AAAA" + spacer + "TGG" + "AAAA"
-    reference = "TTTT" + "CCA" + revcomp(spacer) + "TTTT"
+    spacer = "A" * 19 + "C"   # non-palindromic: revcomp(spacer) != spacer
+    # revcomp(reference) presents spacer + "TGG" at revcomp-index 0; the
+    # asymmetric left padding makes the forward position (8) differ from 0,
+    # so this FAILS under the old revcomp-index behavior and PASSES under the fix.
+    reference = "TTTTTTTT" + "CCA" + revcomp(spacer)   # len 31
     hits = find_offtargets(spacer, reference, max_mismatch=0)
     minus = [h for h in hits if h.strand == "-"]
     assert len(minus) == 1
     h = minus[0]
-    # position locates the matched 23-mer in the FORWARD reference:
+    assert h.position == 8                                  # forward coord, != revcomp index 0
     assert revcomp(reference[h.position:h.position + 23]) == spacer + "TGG"
 
 
