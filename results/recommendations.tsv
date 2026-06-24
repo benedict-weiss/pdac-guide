@@ -1,0 +1,4 @@
+allele	undesignable	recommended_spacer	strand	pam	mechanism	margin	score_wt	specificity	on_target	frequency
+G12D	False	CTTGTGGTAGTTGGAGCTGA	+	TGG	seed_mismatch	0.98	0.02		1.0	0.4
+G12V	False	CTTGTGGTAGTTGGAGCTGT	+	TGG	seed_mismatch	0.98	0.02		1.0	0.3
+G12R	False	CTTGTGGTAGTTGGAGCTCG	+	TGG	seed_mismatch	0.97	0.03		1.0	0.17
