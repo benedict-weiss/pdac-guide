@@ -9,3 +9,6 @@ data/offtarget_cache/*.json
 data/*.fa
 data/*.fa.gz
 .DS_Store
+
+# Local planning/spec docs (kept out of the public repo)
+docs/
