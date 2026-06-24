@@ -9,11 +9,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import numpy as np
+
 from .cfd import cfd_score
-from .seq import pam_matches, revcomp
+from .seq import revcomp
 
 SPACER_LEN = 20
 PAM_LEN = 3
+WINDOW = SPACER_LEN + PAM_LEN
+# Windows processed per batch; caps the transient mismatch mask at ~CHUNK*20 bytes.
+_CHUNK = 2_000_000
 
 
 @dataclass(frozen=True)
@@ -27,24 +32,39 @@ class OffTarget:
     cfd: float
 
 
-def _hamming(a: str, b: str) -> int:
-    return sum(1 for x, y in zip(a, b) if x != y)
-
-
 def _scan(spacer: str, frame: str, strand: str, pam: str, max_mismatch: int) -> list[OffTarget]:
+    last = len(frame) - WINDOW
+    # A PAM whose length isn't 3 can never match a 3-nt frame slice (the old
+    # pam_matches did a length check), so there are no hits.
+    if last < 0 or len(pam) != PAM_LEN:
+        return []
+
+    # Encode frame and spacer as ASCII codes. Every base is compared by equality,
+    # so N (and any other byte) differs from A/C/G/T and counts as a mismatch,
+    # matching the original char-by-char behavior.
+    buf = np.frombuffer(frame.encode("ascii"), dtype=np.uint8)
+    windows = np.lib.stride_tricks.sliding_window_view(buf, WINDOW)  # (last+1, 23), a view
+    spacer_codes = np.frombuffer(spacer.encode("ascii"), dtype=np.uint8)
+    pam_codes = pam.upper().encode("ascii")
+
+    # Scan in chunks so the transient boolean mask stays bounded (~CHUNK*20 bytes)
+    # even for a whole chromosome, instead of allocating one array over all windows.
     out: list[OffTarget] = []
-    last = len(frame) - (SPACER_LEN + PAM_LEN)
-    for i in range(0, last + 1):
-        if not pam_matches(frame[i + SPACER_LEN : i + SPACER_LEN + PAM_LEN], pam):
-            continue
-        site = frame[i : i + SPACER_LEN]
-        mm = _hamming(spacer, site)
-        if mm <= max_mismatch:
-            # `position` is the 23-mer start in FORWARD reference coordinates.
-            # For the minus strand `frame` is revcomp(reference), so map `i`
-            # (index within revcomp) back to the forward strand.
+    n_windows = windows.shape[0]
+    for start in range(0, n_windows, _CHUNK):
+        block = windows[start : start + _CHUNK]
+        mism = (block[:, :SPACER_LEN] != spacer_codes).sum(axis=1)
+        pam_ok = np.ones(block.shape[0], dtype=bool)
+        for j, code in enumerate(pam_codes):
+            if chr(code) != "N":  # 'N' is a wildcard (matches pam_matches)
+                pam_ok &= block[:, SPACER_LEN + j] == code
+        for local in np.nonzero(pam_ok & (mism <= max_mismatch))[0].tolist():
+            i = start + local
+            site = frame[i : i + SPACER_LEN]
+            # `position` is the 23-mer start in FORWARD reference coordinates. For
+            # the minus strand `frame` is revcomp(reference), so map `i` to forward.
             position = i if strand == "+" else last - i
-            out.append(OffTarget(strand, position, site, mm, cfd_score(spacer, site)))
+            out.append(OffTarget(strand, position, site, int(mism[local]), cfd_score(spacer, site)))
     return out
 
 

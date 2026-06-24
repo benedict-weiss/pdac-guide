@@ -3,7 +3,7 @@ name = "guide-design"
 version = "0.1.0"
 description = "Mutation-specific CRISPR guide design for PDAC (KRAS codon 12)"
 requires-python = ">=3.11"
-dependencies = ["pandas>=2.0", "matplotlib>=3.7"]
+dependencies = ["numpy>=1.24", "pandas>=2.0", "matplotlib>=3.7"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]

@@ -20,6 +20,17 @@ def test_pipeline_returns_row_per_allele_and_recommends_designable():
     assert len(cov) == 2
 
 
+def test_pipeline_reports_progress_per_guide():
+    targets = [_designable("G12D", 0.40), _designable("G12V", 0.30)]
+    calls = []
+    run(targets, reference=None, on_progress=lambda done, total: calls.append((done, total)))
+    total = calls[0][1]
+    assert total > 0
+    assert calls[0] == (0, total)            # initial tick
+    assert calls[-1] == (total, total)       # final tick reaches 100%
+    assert [d for d, _ in calls] == list(range(0, total + 1))  # one tick per guide, in order
+
+
 def test_pipeline_flags_undesignable_allele():
     # Distal-only mismatch + high threshold -> undesignable.
     t = Target("KRAS_G12X", "KRAS", "G12X", "C" + "A" * 19 + "TGGAAA", 0, "C", "G", 0.1)

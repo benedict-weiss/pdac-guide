@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Callable
+
 import pandas as pd
 
 from .coverage import coverage_curve
@@ -14,11 +16,20 @@ def run(
     targets: list[Target],
     reference: str | None,
     margin_threshold: float = 0.5,
+    on_progress: Callable[[int, int], None] | None = None,
 ) -> tuple[dict[str, RankedGuide | None], pd.DataFrame, list[dict]]:
+    # Materialize candidates up front so progress has a known denominator. The
+    # per-guide off-target scan is the expensive step, so one tick per guide is
+    # the natural unit of work.
+    candidates = [g for t in targets for g in enumerate_guides(t)]
+    total = len(candidates)
+    if on_progress:
+        on_progress(0, total)
     rgs: list[RankedGuide] = []
-    for t in targets:
-        for g in enumerate_guides(t):
-            rgs.append(evaluate_guide(g, reference=reference))
+    for done, g in enumerate(candidates, start=1):
+        rgs.append(evaluate_guide(g, reference=reference))
+        if on_progress:
+            on_progress(done, total)
 
     recommendations = recommend_per_allele(rgs, margin_threshold)
 

@@ -9,11 +9,13 @@ and safety. This repo designs and ranks guides for the KRAS codon-12 alleles
 
 ```bash
 pip install -e ".[dev]"
-pytest                       # run the test suite
-python scripts/run_analysis.py
+pytest                        # run the test suite
+python3 scripts/run_analysis.py
 ```
 
-Outputs: `results/recommendations.tsv` and `results/figures/*.png`.
+Use `python3` (the script needs Python 3.11+). Outputs: `results/recommendations.tsv`
+and `results/figures/*.png`. Without a reference the off-target scan is skipped and
+the `specificity` column stays empty.
 
 ## Genome-wide off-target search (optional, heavier)
 
@@ -21,12 +23,14 @@ The core run scores discrimination and the wild-type-allele safety check without
 any download. For a genome-scale off-target scan:
 
 ```bash
-python scripts/fetch_data.py --out data/chr12.fa     # downloads chr12 (contains KRAS)
-python scripts/run_analysis.py --reference data/chr12.fa
+python3 scripts/fetch_data.py --out data/chr12.fa     # downloads chr12 (~129 MB, contains KRAS)
+python3 scripts/run_analysis.py --reference data/chr12.fa
 ```
 
-Chromosome 12 is a documented scope limit; full-genome (all chromosomes, or
-Cas-OFFinder if installed) is the extension.
+This fills in the `specificity` column and applies the safety veto. The scan is
+vectorized (NumPy), so chr12 takes roughly 100 seconds; a progress bar shows on a
+terminal. Chromosome 12 is a documented scope limit; full-genome (all chromosomes,
+or Cas-OFFinder if installed) is the extension.
 
 ## How it works (decision tree)
 

@@ -5,4 +5,7 @@ __pycache__/
 build/
 dist/
 data/offtarget_cache/*.json
+# Downloaded reference genomes (large, regenerable via scripts/fetch_data.py)
+data/*.fa
+data/*.fa.gz
 .DS_Store

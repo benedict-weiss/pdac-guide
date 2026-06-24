@@ -10,6 +10,8 @@ step is skipped and clearly reported; discrimination + coverage still run.
 from __future__ import annotations
 
 import argparse
+import sys
+import time
 from pathlib import Path
 
 import matplotlib
@@ -36,6 +38,26 @@ def _load_reference(path: str | None) -> str | None:
     return "".join(seq).upper()
 
 
+def _progress_bar(width: int = 30):
+    """Return an on_progress(done, total) callback drawing a terminal bar on stderr.
+
+    Dependency-free; only animates when stderr is a TTY so piped/CI logs stay clean.
+    """
+    start = time.time()
+
+    def cb(done: int, total: int) -> None:
+        if not sys.stderr.isatty() or total == 0:
+            return
+        filled = int(width * done / total)
+        bar = "#" * filled + "-" * (width - filled)
+        elapsed = time.time() - start
+        end = "\n" if done == total else ""
+        print(f"\rScanning guides [{bar}] {done}/{total}  {elapsed:4.1f}s",
+              end=end, file=sys.stderr, flush=True)
+
+    return cb
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--reference", default=None, help="FASTA for off-target search")
@@ -43,7 +65,9 @@ def main() -> None:
     args = ap.parse_args()
 
     reference = _load_reference(args.reference)
-    _, table, cov = run(TARGETS, reference=reference, margin_threshold=args.margin_threshold)
+    _, table, cov = run(TARGETS, reference=reference,
+                        margin_threshold=args.margin_threshold,
+                        on_progress=_progress_bar())
 
     RESULTS.mkdir(exist_ok=True)
     FIGURES.mkdir(parents=True, exist_ok=True)
