@@ -12,3 +12,6 @@ data/*.fa.gz
 
 # Local planning/spec docs (kept out of the public repo)
 docs/
+
+# Local writeup (kept out of the public repo)
+writeup/
