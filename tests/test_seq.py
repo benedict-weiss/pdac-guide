@@ -18,3 +18,9 @@ def test_pam_matches_ngg():
 
 def test_pam_matches_length_guard():
     assert pam_matches("GG") is False     # wrong length
+
+
+def test_pam_matches_case_insensitive():
+    assert pam_matches("tgg") is True        # lowercase seq3 (default uppercase pattern)
+    assert pam_matches("TGG", "ngg") is True  # lowercase pattern wildcard still matches
+    assert pam_matches("TAG", "ngg") is False  # lowercase pattern, real mismatch
