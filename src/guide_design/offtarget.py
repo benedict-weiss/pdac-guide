@@ -19,6 +19,8 @@ PAM_LEN = 3
 @dataclass(frozen=True)
 class OffTarget:
     strand: str
+    # 0-based start of the matched 23-mer (20-nt protospacer + 3-nt PAM) in the
+    # FORWARD reference, reported consistently across both strands.
     position: int
     site_seq: str
     mismatches: int
@@ -38,7 +40,11 @@ def _scan(spacer: str, frame: str, strand: str, pam: str, max_mismatch: int) -> 
         site = frame[i : i + SPACER_LEN]
         mm = _hamming(spacer, site)
         if mm <= max_mismatch:
-            out.append(OffTarget(strand, i, site, mm, cfd_score(spacer, site)))
+            # `position` is the 23-mer start in FORWARD reference coordinates.
+            # For the minus strand `frame` is revcomp(reference), so map `i`
+            # (index within revcomp) back to the forward strand.
+            position = i if strand == "+" else last - i
+            out.append(OffTarget(strand, position, site, mm, cfd_score(spacer, site)))
     return out
 
 

@@ -23,6 +23,19 @@ def test_finds_near_match_within_threshold_only():
     assert far not in seqs
 
 
+def test_finds_site_on_minus_strand_with_forward_position():
+    from guide_design.seq import revcomp
+    spacer = "ACGTACGTACGTACGTACGT"
+    # revcomp(reference) will present: "AAAA" + spacer + "TGG" + "AAAA"
+    reference = "TTTT" + "CCA" + revcomp(spacer) + "TTTT"
+    hits = find_offtargets(spacer, reference, max_mismatch=0)
+    minus = [h for h in hits if h.strand == "-"]
+    assert len(minus) == 1
+    h = minus[0]
+    # position locates the matched 23-mer in the FORWARD reference:
+    assert revcomp(reference[h.position:h.position + 23]) == spacer + "TGG"
+
+
 def test_specificity_score_decreases_with_offtargets():
     assert specificity_score([]) == 100.0
     assert specificity_score([0.1]) < 100.0
